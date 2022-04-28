@@ -1,0 +1,45 @@
+$redColor: #d61f26;
+
+.mylist-list {
+  padding-top: 50px;
+  display: flex;
+  gap: 40px;
+  .mylist-img {
+    img {
+      width: 346px;
+      height: 220px;
+      border-radius: 10px;
+    }
+  }
+  .mylist-detail {
+    display: flex;
+    align-items: center;
+    .mylist-info {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      h2 {
+        margin-top: -20px;
+        font-weight: 700;
+        font-size: 42px;
+      }
+      ul {
+        display: flex;
+        gap: 15px;
+        li {
+          font-weight: 500;
+          font-size: 14px;
+          list-style: none;
+        }
+      }
+      p {
+        font-weight: 500;
+        font-size: 16px;
+      }
+    }
+    .mylist-rating {
+      display: flex;
+      gap: 40px;
+    }
+  }
+}
