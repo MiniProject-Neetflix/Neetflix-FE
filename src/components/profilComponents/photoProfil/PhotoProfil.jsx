@@ -4,14 +4,17 @@ import "./PhotoProfil.scss";
 
 const PhotoProfil = (props) => {
   const { image, inputFileHandler } = props;
-  console.log(image);
 
   return (
     <div className="profil-img">
-      <img
-        src={"https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
-        alt="err"
-      />
+      {image === "http://localhost:3001/imagenull" ? (
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+          alt="err"
+        />
+      ) : (
+        <img src={image} alt="err" />
+      )}
       <div className="file-upload">
         <label htmlFor="fusk">
           <AiOutlineCloudUpload className="file-icon" /> Upload Foto

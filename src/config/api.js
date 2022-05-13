@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const url = axios.create({
   baseURL: "http://localhost:3001/",
@@ -23,6 +24,7 @@ export default {
         });
     });
   },
+
   login: (data) => {
     return new Promise((resolve, reject) => {
       url
@@ -31,8 +33,9 @@ export default {
           password: data.password,
         })
         .then((response) => {
-          console.log(response.data);
+          toast.success(response.data.message);
           if (response.data.msg) {
+            toast.error(response.data.msg);
             resolve(false);
           } else {
             resolve(true);
@@ -45,6 +48,7 @@ export default {
         });
     });
   },
+
   getOneUser: (id) => {
     return new Promise((resolve, reject) => {
       url
@@ -59,17 +63,60 @@ export default {
         });
     });
   },
+
   updateUser: (data, id) => {
-    url.put(`update/${id}`, {
-      email: data.email,
-      fullName: data.fullName,
-      password: data.password,
+    return new Promise((resolve, reject) => {
+      url
+        .put(`update/${id}`, {
+          fullName: data.fullName,
+          email: data.email,
+          password: data.password,
+        })
+        .then((response) => {
+          toast.success(response.msg);
+          resolve(true);
+        })
+        .catch((err) => {
+          console.log(err.message);
+          reject(false);
+        });
     });
   },
+
+  // updatePass: (data, id) => {
+  //   return new Promise((resolve, reject) => {
+  //     url
+  //       .put(`updatePass/${id}`, { password: data.password })
+  //       .then(() => {
+  //         resolve(true);
+  //       })
+  //       .catch((err) => {
+  //         console.log(err.message);
+  //         reject(false);
+  //       });
+  //   });
+  // },
+
   updateProfile: (data, id) => {
-    let formData = new FormData();
-    formData.append("image", data);
-    url.put(`upload/${id}`, formData).then((res) => console.log(res));
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append("image", data);
+
+      url
+        .put(`upload/${id}`, formData, {
+          headers: {
+            "content-type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          console.log(response.data);
+          resolve(true);
+        })
+        .catch((err) => {
+          console.log(err.response.data.message);
+          reject(false);
+        });
+    });
   },
 
   //Movie
@@ -308,7 +355,7 @@ export default {
     });
   },
 
-  createComment: (userId, movieId, data, title, text, rate) => {
+  createComment: (userId, movieId, data, profile, title, text, rate) => {
     new Promise((resolve, reject) => {
       url
         .post("createComment", {
@@ -316,6 +363,7 @@ export default {
           movieId: movieId,
           userName: data.fullName,
           // history: data.history,
+          profile: profile,
           rate: rate,
           title: title,
           text: text,

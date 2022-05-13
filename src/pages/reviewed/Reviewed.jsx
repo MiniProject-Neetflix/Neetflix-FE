@@ -8,24 +8,28 @@ import MainTitle from "../../components/MainTitle/MainTitle";
 import API from "../../config/api";
 import jwt from "jwt-decode";
 import Fallback from "../../components/Fallback/Fallback";
+import Login from "../../assets/login.png";
 
 const MyList = () => {
   const [dataReviewed, setDataReviewed] = useState([]);
+  const [isLogIn, setIsLogIn] = useState(true);
   const userId = localStorage.getItem("token");
-  const decode = jwt(userId);
 
   const getAllReviewed = async () => {
-    const results = await API.getAllReview();
+    const decode = jwt(userId);
+    const results = await API.getOneUser(decode.id);
     if (results) {
-      setDataReviewed(results.data.filter((el) => el.userId === decode.id));
+      setDataReviewed(results.data.revieweds);
     }
   };
 
   useEffect(() => {
+    if (!userId) {
+      setIsLogIn(false);
+    }
+
     getAllReviewed();
   }, []);
-
-  console.log(dataReviewed);
 
   return (
     <>
@@ -34,7 +38,19 @@ const MyList = () => {
         <div className="reviewed-content">
           <MainTitle>Reviewed</MainTitle>
           <div className="reviewed-data">
-            {dataReviewed.length === 0 && <Fallback>No Reviewed Yet.</Fallback>}
+            {dataReviewed.length === 0 && (
+              <Fallback
+                noImage={
+                  !isLogIn ? (
+                    <img src={Login} width={"350px"} height={"350px"} />
+                  ) : (
+                    ""
+                  )
+                }
+              >
+                {!isLogIn ? "Login Or Signup First" : "No Reviewed Yet."}
+              </Fallback>
+            )}
             {dataReviewed.map((el) => {
               return (
                 <MyListFilm

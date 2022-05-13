@@ -3,6 +3,7 @@ import "./detail.scss";
 import { MdSlowMotionVideo } from "react-icons/md";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import { AiFillStar } from "react-icons/ai";
+import Writing from "../../assets/writing.png";
 import ComFallback from "../../assets/Comment-Fallback.png";
 import Casting from "../..//components/components-detail/Casting";
 import Comment from "../../components/components-detail/Comment";
@@ -13,21 +14,25 @@ import Footer from "../../components/footer/Footer";
 import Loading from "../../components/Loading/Loading";
 import API from "../../config/api";
 import jwt from "jwt-decode";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import YouTube from "react-youtube";
 import Input from "../../components/input/Input";
 import Fallback from "../../components/Fallback/Fallback";
 import Star from "../../components/Star/Star";
-import starRatings from "react-star-ratings/build/star-ratings";
 import StarRatings from "react-star-ratings/build/star-ratings";
+import { useForm } from "react-hook-form";
+import SecondaryButton from "../../components/SecondaryButton/SecondaryButton";
+import { toast } from "react-toastify";
 
 const Detail = () => {
   const { allmovie } = useParams();
+  const { register } = useForm();
 
   //Data Movie
   const [movie, setMovie] = useState([]);
   const [casting, setCasting] = useState([]);
   const [genre, setGenre] = useState([]);
+  const [year, setYear] = useState("");
   const [movieVideo, setMovieVideo] = useState([]);
 
   //Data TvSeries
@@ -47,10 +52,15 @@ const Detail = () => {
 
   //Helper
   const [isCheck, setIsCheck] = useState(false);
+  const [isLogIn, setIsLogIn] = useState(true);
+  const [loadMore, setLoadMore] = useState(false);
+  const [lengthComment, setLengthComment] = useState(3);
+  const hour = Math.floor(movie.runtime / 60);
+  const minutes = movie.runtime % 60;
 
   const movieID = localStorage.getItem("MovieID");
   const userId = localStorage.getItem("token");
-  const decode = jwt(userId);
+
   const TvId = localStorage.getItem("TvID");
 
   useEffect(() => {
@@ -60,16 +70,28 @@ const Detail = () => {
       getTvSeriesVideo(TvId);
     }
 
+    if (!userId) {
+      setIsLogIn(false);
+    }
+
+    if (allmovie === "AllMovies") {
+      getAllComment(movieID);
+    } else {
+      getAllComment(TvId);
+    }
+
     getCasting(movieID);
     getTvCasting();
     getMovie();
-    getAllComment(movieID);
-    getOneUser();
 
-    checkHandler();
-  }, []);
+    if (isLogIn === true) {
+      getOneUser();
+      checkHandler();
+    }
+  }, [loadMore, lengthComment, isCheck]);
 
   const getOneUser = async () => {
+    const decode = jwt(userId);
     const results = await API.getOneUser(decode.id);
     if (results) {
       setUserData(results.data);
@@ -82,10 +104,12 @@ const Detail = () => {
       setTvseries(TvData.data);
       setTvGenre(TvData.data.genres[0]);
       setTvRuntime(TvData.data.episode_run_time);
+      setYear(TvData.data.last_air_date.slice(0, 4));
     } else if (allmovie === "AllMovies") {
       const results = await API.getOneMovie(movieID);
       setMovie(results);
       setGenre(results.genres[0]);
+      setYear(results.release_date.slice(0, 4));
     }
   };
 
@@ -127,6 +151,7 @@ const Detail = () => {
   };
 
   const checkHandler = async () => {
+    const decode = jwt(userId);
     if (allmovie === "AllMovies") {
       const results = await API.getOneMyList(decode.id, movieID);
       if (results.data.userId !== decode.id) {
@@ -146,7 +171,19 @@ const Detail = () => {
     }
   };
 
+  const loadMoreHandler = () => {
+    if (loadMore === false) {
+      setLoadMore(true);
+      setLengthComment(99999);
+    } else {
+      setLoadMore(false);
+      setLengthComment(3);
+    }
+  };
+
   const onSubmitToMyList = async (e) => {
+    const decode = jwt(userId);
+
     e.preventDefault();
     if (isCheck === false) {
       if (allmovie === "AllMovies") {
@@ -155,19 +192,21 @@ const Detail = () => {
           movieId: movie.id,
           title: movie.title,
           image: movie.backdrop_path,
-          year: movie.release_date,
-          duration: movie.runtime,
+          year: year,
+          duration: hour + " Hours " + minutes + " Minutes",
           genre: genre.name,
           casting: casting
             .slice(0, 3)
             .map((el) => el.name)
-            .toString(),
+            .join(", "),
           description: movie.overview,
           rating: movie.vote_average,
           isMylist: true,
-        }).then(() => window.location.reload());
+        });
         if (results) {
-          console.log(results.data);
+          const getOneList = await API.getOneMyList(decode.id, movieID);
+          setIsCheck(getOneList.data.isMylist);
+          toast.success("Succesfully Add To My List");
         }
       } else if (allmovie === "TvSeries") {
         const TvSeriesList = await API.addMylist(
@@ -198,6 +237,8 @@ const Detail = () => {
   };
 
   const removeListHandler = async () => {
+    const decode = jwt(userId);
+
     if (isCheck === true) {
       if (allmovie === "AllMovies") {
         const result = await API.removeList(decode.id, movieID).then(() =>
@@ -253,11 +294,10 @@ const Detail = () => {
               {allmovie === "AllMovies" ? movie.original_title : Tvseries.name}
             </h1>
             <p>
+              {allmovie === "AllMovies" ? year : year} |{" "}
               {allmovie === "AllMovies"
-                ? movie.release_date
-                : Tvseries.last_air_date}{" "}
-              |{" "}
-              {allmovie === "AllMovies" ? movie.runtime : TvRuntime.join(", ")}{" "}
+                ? hour + " Hours " + minutes
+                : TvRuntime.join(", ")}{" "}
               {allmovie === "AllMovies" ? "Minutes" : "Minutes each Episodes"}
             </p>
             {allmovie === "TvSeries" && (
@@ -291,19 +331,21 @@ const Detail = () => {
                 <MdSlowMotionVideo className="icon" />
                 WATCH TRAILER
               </a>
-              <form onSubmit={onSubmitToMyList}>
-                <Button
-                  classButton={isCheck === false ? "listBtn" : "active"}
-                  onClick={removeListHandler}
-                >
-                  {isCheck === false ? (
-                    <BsBookmark className="icon" />
-                  ) : (
-                    <BsBookmarkFill className="iconActive" />
-                  )}
-                  {isCheck === true ? "ALREADY IN LIST" : "SAVE TO MY LIST"}
-                </Button>
-              </form>
+              {isLogIn && (
+                <form onSubmit={onSubmitToMyList}>
+                  <Button
+                    classButton={isCheck === false ? "listBtn" : "active"}
+                    onClick={removeListHandler}
+                  >
+                    {isCheck === false ? (
+                      <BsBookmark className="icon" />
+                    ) : (
+                      <BsBookmarkFill className="iconActive" />
+                    )}
+                    {isCheck === true ? "ALREADY IN LIST" : "SAVE TO MY LIST"}
+                  </Button>
+                </form>
+              )}
             </div>
           </div>
         </div>
@@ -381,52 +423,77 @@ const Detail = () => {
           {/* end Casting */}
 
           {/* start write and review */}
-          <div className="container-write">
-            <h1>Write Your Review</h1>
-            <div className="write-rating">
-              <h3>Rating</h3>
-              <Star
-                star=" "
-                starInput={
-                  <StarRatings
-                    name="rating"
-                    rating={rating}
-                    starRatedColor="rgba(254, 206, 32, 1)"
-                    starHoverColor={"rgba(254, 206, 32, 1)"}
-                    numberOfStars={10}
-                    changeRating={setRating}
-                  />
-                }
-                rating={rating}
-                setRating={setRating}
-              />
+          {isLogIn === false ? (
+            <div className="fallback-write">
+              <img src={Writing} width={"280px"} height={"280px"} />
+              <div className="content-fallback">
+                <p>Signup Or Login To Comment</p>
+                <div className="action-fallback">
+                  <Link to={"/signup"}>
+                    <SecondaryButton className="fallback-button">
+                      Signup
+                    </SecondaryButton>
+                  </Link>
+                  <Link to={"/login"}>
+                    <SecondaryButton className="fallback-button">
+                      Login
+                    </SecondaryButton>
+                  </Link>
+                </div>
+              </div>
             </div>
-            <div className="title-write">
-              <label htmlFor="title">Title</label>
-              <Input
-                className="input-title"
-                type="text"
-                id="title"
-                placeholder="Write your title"
-                onChange={(e) => setTitle(e.target.value)}
-              />
+          ) : (
+            <div className="container-write">
+              <h1>Write Your Review</h1>
+              <div className="write-rating">
+                <h3>Rating</h3>
+                <Star
+                  star=" "
+                  starInput={
+                    <StarRatings
+                      name="rating"
+                      rating={rating}
+                      starRatedColor="rgba(254, 206, 32, 1)"
+                      starHoverColor={"rgba(254, 206, 32, 1)"}
+                      numberOfStars={10}
+                      changeRating={setRating}
+                    />
+                  }
+                  rating={rating}
+                  setRating={setRating}
+                />
+              </div>
+              <div className="title-write">
+                <label htmlFor="title">Title</label>
+                <Input
+                  className="input-title"
+                  type="text"
+                  id="title"
+                  placeholder="Write your title"
+                  register={register("title", {
+                    required: true,
+                    onChange: (e) => setTitle(e.target.value),
+                  })}
+                  names="title"
+                />
+              </div>
+              <div className="write-review">
+                <h3>Review</h3>
+                <TextEditor
+                  movieId={movieID}
+                  title={title}
+                  setComment={setComment}
+                  data={userData}
+                  rating={rating}
+                  dataMovie={movie}
+                  genre={genre}
+                  casting={casting}
+                  tvCasting={TvCasting}
+                  image={userData.image}
+                />
+              </div>
             </div>
-            <div className="write-review">
-              <h3>Review</h3>
-              <TextEditor
-                userId={decode.id}
-                movieId={movieID}
-                title={title}
-                setComment={setComment}
-                data={userData}
-                rating={rating}
-                dataMovie={movie}
-                genre={genre}
-                casting={casting}
-                tvCasting={TvCasting}
-              />
-            </div>
-          </div>
+          )}
           {/* end write and review */}
           {/* start comment */}
           <div className="detail-comment">
@@ -445,11 +512,17 @@ const Detail = () => {
                 Be The First Comment!
               </Fallback>
             )}
-            {comment.map((el) => {
-              return <Comment key={el.id} data={el} image={userData.image} />;
-            })}
-            {comment.length > 7 && (
-              <Button label={"Load More"} classButton={"primary"} />
+            {comment
+              .map((el) => {
+                return <Comment key={el.id} data={el} />;
+              })
+              .slice(0, lengthComment)}
+            {comment.length > 3 && (
+              <Button
+                label={loadMore ? "Load Less" : "Load More"}
+                classButton={"primary"}
+                onClick={loadMoreHandler}
+              />
             )}
           </div>
           {/* end comment */}

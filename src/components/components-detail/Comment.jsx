@@ -18,7 +18,13 @@ const Comment = ({ data }) => {
   return (
     <div className="container-comment">
       <div className="header">
-        <div className="img"></div>
+        {!data.profile ? (
+          <img
+            src={"https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
+          />
+        ) : (
+          <img src={`http://localhost:3001/image${data.profile}`} />
+        )}
         <div className="name">
           <h3>{data.userName}</h3>
           <p>

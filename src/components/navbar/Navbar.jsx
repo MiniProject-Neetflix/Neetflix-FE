@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Input from "../input/Input";
 import "./Navbar.scss";
 import { Link } from "react-router-dom";
-import { SiThemoviedatabase } from "react-icons/si";
+import { BiSearch } from "react-icons/bi";
 import classNames from "classnames";
 import NavbarDropDown from "./NavbarDropDown";
 import decode from "jwt-decode";
@@ -67,7 +66,7 @@ const Navbar = (props) => {
   return (
     <div className="navbar">
       <div className="navbar-menu">
-        <h1 className="logo">Neetflx Review</h1>
+        <h1 className="logo">Neetflix Review</h1>
         <ul>
           <Link className={classNames("Link", props.activeHome)} to="/">
             <li>Home</li>
@@ -97,12 +96,15 @@ const Navbar = (props) => {
         </ul>
       </div>
       <div className="navbar-search">
-        <Input
-          inputClassName={"inputNavbar"}
-          type="text"
-          placeholder="Search"
-          onChange={searchOnChange}
-        />
+        <div className="inputWrapper">
+          <input
+            className={"inputNavbar"}
+            type="text"
+            placeholder="Search"
+            onChange={searchOnChange}
+          />
+          <BiSearch className="search-icon" />
+        </div>
         {searchResults && (
           <div className="search-list">
             <div className={classNames("results", searchClass)}>

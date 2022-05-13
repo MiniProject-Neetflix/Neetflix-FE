@@ -7,6 +7,7 @@
     height: 160px;
     background: gray;
     border-radius: 50%;
+    margin-left: 8px;
   }
   input[type="file"] {
     display: none;
@@ -19,6 +20,7 @@
     justify-content: center;
     border: 1px solid #a7a6a6;
     border-radius: 8px;
+    margin-left: 8px;
     .file-icon {
       font-size: 24px;
     }

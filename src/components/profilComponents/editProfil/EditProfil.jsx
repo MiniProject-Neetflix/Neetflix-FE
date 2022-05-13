@@ -7,13 +7,16 @@ import SubmitButton from "../../submitButton/SubmitButton";
 import API from "../../../config/api";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const EditProfil = (props) => {
-  const { uploadImages } = props;
+  const { uploadImages, saveImage } = props;
   const { handleSubmit, register } = useForm();
   const [fullnameEdit, setFullnameEdit] = useState("");
   const [emailEdit, setEmailEdit] = useState("");
   const [passwordEdit, setPasswordEdit] = useState("");
+  const [passwordCon, setPasswordCon] = useState("");
+  const [isValid, setIsValid] = useState();
   const navigatePage = useNavigate();
 
   const token = localStorage.getItem("token");
@@ -24,18 +27,23 @@ const EditProfil = (props) => {
       if (result) {
         setFullnameEdit(result.data.fullName);
         setEmailEdit(result.data.email);
-        setPasswordEdit(result.data.password);
       }
     }
   }, []);
 
   const onSubmit = (data) => {
+    saveImage();
     const dataToken = decode(token);
-    const result = API.updateUser(data, dataToken.id);
-    if (!result) {
-      navigatePage("/");
+    if (passwordCon !== passwordEdit) {
+      setIsValid(false);
+    } else {
+      const result = API.updateUser(data, dataToken.id);
+      if (result) {
+        navigatePage("/");
+      }
     }
   };
+
   return (
     <div className="edit-profil">
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -45,9 +53,11 @@ const EditProfil = (props) => {
             value={fullnameEdit}
             inputClassName={"profil-input"}
             type="text"
+            names="fullName"
             placeholder={"Fullname"}
             register={register("fullName", {
               required: true,
+              value: fullnameEdit,
               onChange: (e) => setFullnameEdit(e.target.value),
             })}
           />
@@ -56,9 +66,11 @@ const EditProfil = (props) => {
             value={emailEdit}
             inputClassName={"profil-input"}
             type="text"
+            names="email"
             placeholder={"Email"}
             register={register("email", {
               required: true,
+              value: emailEdit,
               onChange: (e) => setEmailEdit(e.target.value),
             })}
           />
@@ -67,19 +79,28 @@ const EditProfil = (props) => {
             value={passwordEdit}
             inputClassName={"profil-input"}
             type="password"
+            names="password"
+            id="password"
             placeholder={"Password"}
             register={register("password", {
               required: true,
+              value: passwordEdit,
               onChange: (e) => setPasswordEdit(e.target.value),
             })}
           />
-
           <Label>Confirm password</Label>
-          <Input
-            inputClassName={"profil-input"}
+          <input
+            className={"pass-input"}
             type="password"
+            names="confirmPass"
             placeholder={"Confirm password"}
+            onChange={(e) => setPasswordCon(e.target.value)}
           />
+          {isValid === false && (
+            <p className="fallback-profile" style={{ color: "red" }}>
+              ⚠️ Password Tidak Sama
+            </p>
+          )}
         </div>
         <div className="save-profil">
           <SubmitButton type="submit" onClick={uploadImages}>

@@ -8,6 +8,8 @@
   font-weight: 700;
   border-radius: 6px;
   margin-top: 50px;
+  cursor: pointer;
+  transition: 0.3s;
   &:hover {
     color: white;
     background-color: red;

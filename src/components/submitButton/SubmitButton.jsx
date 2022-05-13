@@ -3,7 +3,7 @@ import "./SubmitButton.scss";
 
 const SubmitButton = (props) => {
   return (
-    <div className="submit-button" onClick={props.onClick}>
+    <div className={props.className || "submit-button"} onClick={props.onClick}>
       <button type={props.type}>{props.children}</button>
     </div>
   );

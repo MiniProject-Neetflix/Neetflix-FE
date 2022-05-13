@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Signup.scss";
 import FirstTitle from "../../components/loginSignUpComponents/firstTitle/FirstTitle";
 import SecondTitle from "../../components/loginSignUpComponents/secondTitle/SecondTitle";
@@ -8,20 +8,28 @@ import Input from "../../components/input/Input";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import API from "../../config/api";
+import { toast } from "react-toastify";
+import TextFallback from "../../components/TextFallback/TextFallback";
 
 const Signup = () => {
+  const [passInput, setPassInput] = useState("");
+  const [conPassInput, setConPassInput] = useState("");
+  const [isValid, setIsValid] = useState(false);
   const navigate = useNavigate();
   const {
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm({ mode: "onChange" });
+  } = useForm({ mode: "onBlur" });
 
   const onSubmit = async (data) => {
-    const result = await API.signUp(data);
-    if (result) {
+    if (passInput !== conPassInput) {
+      setIsValid(true);
+    } else {
+      const result = await API.signUp(data);
       console.log(result);
       navigate("/login");
+      toast.success("Daftar Berhasil!");
     }
   };
   return (
@@ -42,9 +50,9 @@ const Signup = () => {
               })}
               names="fullname"
             />
-            {/* {errors.fullname && errors.fullname.type === "required" && (
-              <p>⚠️ Tidak Boleh Kosong</p>
-            )} */}
+            {errors.fullname && errors.fullname.type === "required" && (
+              <TextFallback>⚠️ Fullname Tidak Boleh Kosong</TextFallback>
+            )}
             <Label>Email</Label>
             <Input
               inputClassName={"signupLogin"}
@@ -55,7 +63,9 @@ const Signup = () => {
               })}
               names="email"
             />
-
+            {errors.email && errors.email.type === "required" && (
+              <TextFallback>⚠️ Email Tidak Boleh Kosong</TextFallback>
+            )}
             <Label>Password</Label>
             <Input
               inputClassName={"signupLogin"}
@@ -63,9 +73,13 @@ const Signup = () => {
               placeholder={"Password"}
               register={register("password", {
                 required: true,
+                onChange: (e) => setPassInput(e.target.value),
               })}
               names="password"
             />
+            {errors.password && errors.password.type === "required" && (
+              <TextFallback>⚠️ Password Tidak Boleh Kosong</TextFallback>
+            )}
             <Label>Confirm Password</Label>
             <Input
               inputClassName={"signupLogin"}
@@ -73,9 +87,11 @@ const Signup = () => {
               placeholder={"Confirm Password"}
               register={register("conPassword", {
                 required: true,
+                onChange: (e) => setConPassInput(e.target.value),
               })}
               names="conPassword"
             />
+            {isValid && <TextFallback>⚠️Password Tidak Sama</TextFallback>}
             <SubmitButton type="submit">Sign Me Up</SubmitButton>
             <Link style={{ textDecoration: "none" }} to="/login">
               <p>Already have an account?</p>

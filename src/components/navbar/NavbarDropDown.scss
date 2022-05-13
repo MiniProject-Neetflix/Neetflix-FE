@@ -10,9 +10,12 @@ $redColor: #eb5757;
     width: 40px;
     height: 40px;
   }
+  .profileNav{
+    border-radius: 50%;
+  }
   p {
     font-weight: 600;
-    font-size: 16px;
+    font-size: 15px;
   }
   .dropDownNav {
     position: absolute;

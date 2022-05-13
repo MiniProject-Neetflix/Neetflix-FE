@@ -10,11 +10,15 @@ import TvSeries from "./pages/TvSeries/TvSeries";
 import MyList from "./pages/mylist/MyList";
 import Reviewed from "./pages/reviewed/Reviewed";
 import Animation from "./pages/animation/Animation";
+import Notify from "./components/Notify/Notify";
+import Backup from "./pages/Backup/Backup";
 
 const App = () => {
   return (
     <div className="App">
+      <Notify />
       <Routes>
+        <Route path="*" element={<Backup />} />
         <Route path="/" element={<Home />} />
         <Route path="/category/:category" element={<Category />} />
         <Route path="/detail/:allmovie" element={<Detail />} />

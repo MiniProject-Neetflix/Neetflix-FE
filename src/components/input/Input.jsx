@@ -1,6 +1,5 @@
 import React from "react";
 import "./Input.scss";
-import { AiOutlineSearch } from "react-icons/ai";
 
 const Input = (props) => {
   const {
@@ -22,7 +21,7 @@ const Input = (props) => {
         value={value}
         placeholder={placeholder}
         className={className || "input"}
-        onChange={onChange}
+        // onChange={onChange}
         checked={checked}
         id={id}
         name={props.names}

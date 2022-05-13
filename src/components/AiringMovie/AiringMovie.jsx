@@ -14,7 +14,7 @@ const AiringMovie = (props) => {
 
   return (
     <div className="airing-box">
-      <Link to={"detail/AllMovies"}>
+      <Link to={"detail/AllMovies"} style={{ textDecoration: "none" }}>
         <img
           className="airing-images"
           src={`https://image.tmdb.org/t/p/w500${image}`}

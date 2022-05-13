@@ -1,4 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Courgette&family=Dancing+Script:wght@700&family=Inter:wght@200;300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@300;500&display=swap');
+
 $redColor: #d61f26;
+$interFont: 'Inter', sans-serif;
 
 .mylist-list {
   padding-top: 50px;
@@ -21,20 +24,28 @@ $redColor: #d61f26;
       h2 {
         margin-top: -20px;
         font-weight: 700;
-        font-size: 42px;
+        font-size: 30px;
+        color: rgba(64, 68, 76, 1);
+        font-family: $interFont;
+
       }
       ul {
         display: flex;
         gap: 15px;
         li {
           font-weight: 500;
-          font-size: 14px;
+          font-size: 12px;
           list-style: none;
+          color: rgba(157, 158, 167, 1);
+          font-family: $interFont;
+
         }
       }
       p {
         font-weight: 500;
-        font-size: 16px;
+        font-size: 14px;
+        font-family: $interFont;
+
       }
     }
     .mylist-rating {
